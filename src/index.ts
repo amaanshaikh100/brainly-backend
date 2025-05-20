@@ -2,13 +2,15 @@ import express from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import { userMiddleware } from "./middleware";
+import { config } from "./config";
+
 import User from "./models/User";
+import Content from "./models/Content";
 
 const app = express();
 
 app.use(express.json());
-dotenv.config();
 
 // add zod validation
 app.post("/api/v1/signup", async (req, res) => {
@@ -22,7 +24,7 @@ app.post("/api/v1/signup", async (req, res) => {
       {
         id: newUser._id,
       },
-      process.env.JWT_SECRET_KEY as string
+      config.jwtSecret as string
     );
 
     res.status(200).json({
@@ -38,9 +40,38 @@ app.post("/api/v1/signup", async (req, res) => {
   }
 });
 
-app.post("/api/v1/content", (req, res) => {});
+app.post("/api/v1/content", userMiddleware, async (req, res) => {
+  const title = req.body.title;
+  const link = req.body.link;
+  const type = req.body.type;
 
-app.get("/api/v1/content", (req, res) => {});
+  const newContent = await Content.create({
+    title,
+    link,
+    type,
+    // @ts-ignore
+    userId: req.userId,
+    tags: [],
+  });
+
+  res.status(201).json({
+    message: "content api",
+    data: newContent,
+  });
+});
+
+app.get("/api/v1/content", userMiddleware, async (req, res) => {
+  // @ts-ignore
+  const userId = req.userId;
+  const content = await Content.find({
+    userId,
+  }).populate("userId", "email");
+
+  res.status(200).json({
+    status: "success",
+    data: content,
+  });
+});
 
 app.delete("/api/v1/content", (req, res) => {});
 
