@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     minlength: 4,
-    maxlength: 12,
     required: [true, "Password cannot be empty."],
   },
 });
