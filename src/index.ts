@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 import { userMiddleware } from "./middleware";
 import { config } from "./config";
 import { random } from "./utils";
@@ -13,6 +14,7 @@ import Link from "./models/Link";
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 // add zod validation
 app.post("/api/v1/signup", async (req, res) => {
